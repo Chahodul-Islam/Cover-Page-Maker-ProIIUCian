@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>ProIIUCian - Cover Page Generator</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Crimson+Text:ital,wght@0,400;0,700;1,400&family=Cinzel:wght@700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- Load libraries before body content -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<nav class="app-nav">
+    <div class="logo">
+        <img src="mosque-icon.png" alt="🕌" class="logo-icon"> Pro<span>IIUCian</span>
+    </div>
+</nav>
+
+<div id="home-page" class="screen main-viewport">
+    <div class="hero-content">
+        <h1 class="gradient-text">From assignments to final projects, your reports deserve a better first impression.</h1>
+        <p>Build perfect cover pages in a few clicks.</p>
+        
+        <div class="category-grid">
+            <div class="mode-card" onclick="openEditor('Assignment', '📄')">
+                <div class="icon">📄</div>
+                <h3>Assignment</h3>
+            </div>
+            <div class="mode-card" onclick="openEditor('Lab Report', '🔬')">
+                <div class="icon">🔬</div>
+                <h3>Lab Report</h3>
+            </div>
+            <div class="mode-card" onclick="openEditor('Project Report', '🚀')">
+                <div class="icon">🚀</div>
+                <h3>Project Report</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="editor-page" class="screen workspace" style="display: none;">
+    <aside class="editor-sidebar" id="sidebar">
+        <button class="btn-back" onclick="goHome()">← Dashboard</button>
+        <h2 id="editor-title">Editor</h2>
+        
+        <div class="form-container">
+            <div class="input-group">
+                <label>University Logo</label>
+                <input type="file" id="in-logo" accept="image/*" class="file-input">
+            </div>
+            
+            <div class="input-group"><label>University Name</label><input type="text" id="in-uni" placeholder="International Islamic University Chittagong"></div>
+            <div class="input-group"><label>Department</label><input type="text" id="in-dept" placeholder="Dept. of Computer Science and Engineering"></div>
+            
+            <div id="project-fields" style="display: none;">
+                <div class="input-group"><label>Team Name</label><input type="text" id="in-team" placeholder="Team TriLogic"></div>
+            </div>
+
+            <div class="input-group"><label>Topic Title</label><input type="text" id="in-topic" placeholder="e.g. Binary Search Tree (BST) Implementation"></div>
+            
+            <div class="row">
+                <div class="input-group"><label>Course Code</label><input type="text" id="in-code" placeholder="CSE-2321"></div>
+                <div class="input-group"><label>Course Title</label><input type="text" id="in-title" placeholder="Data Structures"></div>
+            </div>
+
+            <div class="input-group"><label>Submission Date</label><input type="date" id="in-date"></div>
+            
+            <div class="section-title">Submitted To</div>
+            <div class="input-group"><label>Instructor Name</label><input type="text" id="in-tname" placeholder="Mohammed Shamsul Alam"></div>
+            <div class="input-group"><label>Designation</label><input type="text" id="in-tdes" placeholder="Professor"></div>
+            
+            <div class="section-title">Submitted By</div>
+            <div id="student-inputs">
+                <div class="input-group"><label>Name</label><input type="text" id="in-sname" placeholder="Md. Shahed Saim"></div>
+                <div class="row">
+                    <div class="input-group"><label>ID</label><input type="text" id="in-sid" placeholder="C221078"></div>
+                    <div class="input-group"><label>Section</label><input type="text" id="in-sec" placeholder="3BM"></div>
+                </div>
+            </div>
+            <button id="add-member" class="btn-ghost" style="display:none;" onclick="addMember()">+ Add Member</button>
+
+            <button class="btn-preview mobile-only" onclick="togglePreview()">👁️ Preview</button>
+            <button class="btn-download" onclick="downloadPDF()">📥 Download PDF</button>
+        </div>
+    </aside>
+
+    <main class="preview-workspace" id="preview-area">
+        <button class="btn-close-preview mobile-only" onclick="togglePreview()">✕ Close</button>
+        <div id="cover-page">
+            <div class="p-header">
+                <div class="logo-box"><img id="out-img" src="" style="display: none;"></div>
+                <div id="out-uni" class="p-uni">UNIVERSITY NAME</div>
+                <div id="out-dept" class="p-dept">Department Name</div>
+            </div>
+
+            <div class="p-badge-wrap">
+                <div id="out-type" class="p-type-badge">Assignment</div>
+            </div>
+            <div class="p-on">On</div>
+
+            <div class="p-topic-box">
+                <h1 id="out-topic">TOPIC TITLE</h1>
+            </div>
+
+            <div class="p-details-list">
+                <div class="p-line"><span class="lbl">Course Code</span>: <span id="out-code"></span></div>
+                <div class="p-line"><span class="lbl">Course Title</span>: <span id="out-title"></span></div>
+                <div id="team-line" class="p-line" style="display:none;"><span class="lbl">Team Name</span>: <span id="out-team"></span></div>
+                <div class="p-line"><span class="lbl">Submission Date</span>: <span id="out-date"></span></div>
+            </div>
+
+            <div class="p-submission-row">
+                <div class="p-column">
+                    <div class="p-sub-title">Submitted By :</div>
+                    <div id="student-render">
+                    </div>
+                </div>
+                <div class="p-column text-right">
+                    <div class="p-sub-title">Submitted To :</div>
+                    <div id="out-tname" class="p-name-bold">Teacher Name</div>
+                    <div id="out-tdes" class="p-des-text">Designation</div>
+                </div>
+            </div>
+
+            <div class="p-remarks-box">Remarks</div>
+        </div>
+    </main>
+</div>
+
+<!-- Copyright only in UI footer, not in PDF -->
+<footer class="ui-footer">
+    <div class="footer-content">
+        Copyright © 2026 All rights reserved | Shahodul Islam | 52th Batch | ID: C213043 | Dept. of CSE | IIUC
+    </div>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
